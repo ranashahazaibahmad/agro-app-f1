@@ -1,0 +1,52 @@
+/auth/login [post] 
+{
+    "number" :"0300754-166",
+    "password" :"Qasid"
+  
+}
+/auth/register [post]
+{
+    "number" :"0300754-166",
+    "password" :"Qasid"
+    "user_type" :"seller",
+    "username" :"Qasid"
+}
+
+/ad [post - create new ad]
+header - authorization - token
+{
+  "ad_title": "Sample Ad Title",
+  "ad_price": 100.00,
+  "ad_weight": 2.5,
+  "ad_location": "Sample Location",
+  "ad_delivery": true,
+  "image1_url": "http://example.com/image1.jpg",
+  "image2_url": "http://example.com/image2.jpg",
+  "image3_url": "http://example.com/image3.jpg"
+}
+
+/ad [get -  to retrive all ads of logged in seller]
+[?category="tech" ?min_price=100 ?max_price=200]
+
+
+/ad/all [get - retrive all ads]
+
+/ad//user/:id [get - retrive ads of a specific user]
+
+/ad/all/:id [get - retrive a single ad]
+
+/ad/:sid {put - to update an ad}
+header - authorization - token
+{
+  "ad_title": "Sample Ad Title",
+  "ad_price": 100.00,
+  "ad_weight": 2.5,
+  "ad_location": "Sample Location",
+  "ad_delivery": true,
+  "image1_url": "http://example.com/image1.jpg",
+  "image2_url": "http://example.com/image2.jpg",
+  "image3_url": "http://example.com/image3.jpg"
+}
+
+/ad/:sid {delete - to delete an ad}
+
