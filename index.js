@@ -22,9 +22,8 @@
   const agroAdRoutes = require('./routes/agroAdRoutes');
   const profileRoutes = require('./routes/profile');
   const bidRoutes = require('./routes/bids');
-
-
-  // Middleware
+ 
+  // Middlewar e
   app.use(bodyParser.json());
 
   // Serve static files from the 'uploads' folder
