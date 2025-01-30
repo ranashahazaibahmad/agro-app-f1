@@ -73,6 +73,27 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Get all bids for a specific user by user_id
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const result = await pool.query(
+      'SELECT bids.*, agro_ads.image1_url FROM bids ' +
+      'JOIN agro_ads ON bids.ad_id = agro_ads.id ' + 
+      'WHERE bids.user_id = $1', 
+      [userId]
+    );
+
+    if (result.rows.length === 0) return res.status(404).json({ error: 'No bids found for this user' });
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 // Update a bid
 router.put('/:id', async (req, res) => {
   try {
