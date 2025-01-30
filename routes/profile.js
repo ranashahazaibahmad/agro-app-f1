@@ -46,6 +46,41 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/all', async (req, res) => {
+  try {
+    const authHeader = req.headers['authorization'];
+
+    
+
+    const token = authHeader;
+
+    let decoded;
+    try {
+      decoded = verifyToken(token);
+    } catch (error) {
+      return res.status(401).json({ message: 'Invalid token', error: error.message });
+    }
+
+    const query = `
+      SELECT id, number, username, user_type, created_at, updated_at, 
+             profile_pic, dob, region, total_bid, name, email 
+      FROM agro_users
+    `;
+
+    const result = await pool.query(query);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'No users found' });
+    }
+
+    res.json({ users: result.rows });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 // Update Profile with Image Upload
 router.put('/', upload.single('profile_pic'), async (req, res) => {
   const token = req.headers['authorization'];
