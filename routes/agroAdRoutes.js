@@ -18,7 +18,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 // POST: Create a new ad
 // POST: Create a new ad with image uploads
-router.post('/' , upload.array('images', 3), async (req, res) => {
+router.post('/' , isSeller , upload.array('images', 3), async (req, res) => {
   const { ad_title, ad_price, ad_weight, ad_location, ad_delivery, category } = req.body;
   const { id } = req.user; // Authenticated seller's ID
 
@@ -57,11 +57,13 @@ router.post('/' , upload.array('images', 3), async (req, res) => {
 });
 
 // GET: Retrieve all ads for the logged-in seller
-router.get('/', async (req, res) => {
-  const { user_id } = req.user; // From the authenticated seller
+router.get('/', isSeller , async (req, res) => {
+  const { id } = req.user; // From the authenticated seller
+  console.log(req.user);
+  
 
   try {
-    const result = await pool.query('SELECT * FROM agro_ads WHERE user_id = $1', [user_id]);
+    const result = await pool.query('SELECT * FROM agro_ads WHERE user_id = $1', [id]);
     res.status(200).json({ ads: result.rows });
   } catch (error) {
     console.error(error);
@@ -223,7 +225,7 @@ router.get('/all/:id', async (req, res) => {
 });
 
 // PUT: Update an existing ad
-router.put('/:sid', async (req, res) => {
+router.put('/:sid', isSeller , async (req, res) => {
   const { sid } = req.params;
   const { ad_title, ad_price, ad_weight, ad_location, ad_delivery, image1_url, image2_url, image3_url } = req.body;
   const { id } = req.user; // From the authenticated seller
@@ -250,7 +252,7 @@ router.put('/:sid', async (req, res) => {
 });
 
 // DELETE: Delete an existing ad
-router.delete('/:sid', async (req, res) => {
+router.delete('/:sid', isSeller , async (req, res) => {
   const { sid } = req.params;
   const { id } = req.user; // From the authenticated seller
 

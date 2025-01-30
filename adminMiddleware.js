@@ -44,7 +44,7 @@ const isSeller = async (req, res, next) => {
     const  {rows}  = await pool.query('SELECT * FROM agro_users WHERE id = $1', [decoded.id]);
   
 
-    if (!rows.length || rows[0].user_type !== 'Seller') {
+    if (!rows.length) {
       return res.status(403).json({ message: "You must be a seller to perform this action." });
     }
 

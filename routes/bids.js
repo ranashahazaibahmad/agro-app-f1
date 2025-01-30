@@ -9,7 +9,22 @@ const { v2: cloudinary } = require('cloudinary');
 
 
 // Create a new bid
-router.get('/', async (req, res) => {
+router.post('/', async (req, res) => {
+  try {
+    const { user_id, ad_id, price } = req.body;
+    const result = await pool.query(
+      'INSERT INTO bids (user_id, ad_id, bid_price) VALUES ($1, $2, $3) RETURNING *',
+      [user_id, ad_id, price]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+  
+
+  router.get('/', async (req, res) => {
     try {
       // Get sorting parameters from the query string (default values)
       const sortBy = req.query.sortBy || 'created_at';  // Default to 'created_at' if not provided
@@ -42,18 +57,6 @@ router.get('/', async (req, res) => {
     }
   });
   
-
-// Get all bids
-router.get('/', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT bids.*, agro_ads.image1_url FROM bids ' +
-      'JOIN agro_ads ON bids.ad_id = agro_ads.id');
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
 
 // Get a specific bid by ID
 router.get('/:id', async (req, res) => {

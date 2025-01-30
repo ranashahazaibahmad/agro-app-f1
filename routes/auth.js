@@ -5,7 +5,7 @@ const { hashPassword, comparePassword, generateToken, verifyToken } = require('.
 
 // Register route
 router.post('/register', async (req, res) => {
-  const { number, password, username, user_type } = req.body;
+  const { number, password, username } = req.body;
 
   if (!number || !password || !username) {
     return res.status(400).json({ message: 'number, password, and username are required' });
@@ -23,8 +23,8 @@ router.post('/register', async (req, res) => {
 
     // Insert user into the database
     const result = await pool.query(
-      'INSERT INTO agro_users (number, password, username, user_type) VALUES ($1, $2, $3, $4) RETURNING id, number, username, user_type, created_at',
-      [number, hashedPassword, username, user_type]
+      'INSERT INTO agro_users (number, password, username) VALUES ($1, $2, $3) RETURNING id, number, username, created_at',
+      [number, hashedPassword, username]
     );
 
     const user = result.rows[0];
@@ -61,7 +61,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Generate JWT token
-    const token = generateToken({ id: user.id, number: user.number, user_type: user.user_type });
+    const token = generateToken({ id: user.id, number: user.number});
 
     // Send token along with user info in response
     res.json({
@@ -70,7 +70,7 @@ router.post('/login', async (req, res) => {
       id:user.id,
       number: user.number,
       username: user.username,
-      user_type: user.user_type,
+
     });
   } catch (error) {
     res.status(500).json({ message: 'Error logging in', error: error.message });
