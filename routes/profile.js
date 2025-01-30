@@ -84,7 +84,7 @@ router.get('/all', async (req, res) => {
 // Update Profile with Image Upload
 router.put('/', upload.single('profile_pic'), async (req, res) => {
   const token = req.headers['authorization'];
-  const { username, password, user_type, dob, region, total_bid, name, email } = req.body;
+  const { username, password, user_type, dob, region, name, email } = req.body;
 
   if (!token) {
     return res.status(401).json({ message: 'Token required' });
