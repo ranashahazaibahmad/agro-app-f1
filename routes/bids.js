@@ -12,16 +12,26 @@ const { v2: cloudinary } = require('cloudinary');
 router.post('/', async (req, res) => {
   try {
     const { user_id, ad_id, price } = req.body;
-    const result = await pool.query(
+
+    // Insert the new bid
+    const bidResult = await pool.query(
       'INSERT INTO bids (user_id, ad_id, bid_price) VALUES ($1, $2, $3) RETURNING *',
       [user_id, ad_id, price]
     );
-    res.json(result.rows[0]);
+
+    // Update the total_bid count for the user
+    await pool.query(
+      'UPDATE agro_users SET total_bid = total_bid + 1 WHERE id = $1',
+      [user_id]
+    );
+
+    res.json(bidResult.rows[0]);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
   
 
   router.get('/', async (req, res) => {
