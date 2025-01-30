@@ -64,7 +64,7 @@ router.get('/all', async (req, res) => {
     const query = `
       SELECT id, number, username, user_type, created_at, updated_at, 
              profile_pic, dob, region, total_bid, name, email 
-      FROM agro_users
+      FROM agro_users ORDER BY total_bid DESC
     `;
 
     const result = await pool.query(query);
