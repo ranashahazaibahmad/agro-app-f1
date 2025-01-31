@@ -140,6 +140,59 @@ router.get('/ad/:adId', async (req, res) => {
   }
 });
 
+router.put('/select-winner/:bidId', async (req, res) => {
+  try {
+    const { bidId } = req.params;
+
+    // Get bid details
+    const bidResult = await pool.query('SELECT * FROM bids WHERE id = $1', [bidId]);
+    if (bidResult.rows.length === 0) return res.status(404).json({ error: 'Bid not found' });
+
+    const bid = bidResult.rows[0];
+
+    // Check if the requesting user is the owner of the ad
+    const adOwnerResult = await pool.query('SELECT user_id FROM agro_ads WHERE id = $1', [bid.ad_id]);
+    if (adOwnerResult.rows.length === 0) return res.status(404).json({ error: 'Ad not found' });
+
+    const adOwner = adOwnerResult.rows[0].user_id;
+    if (req.user.id !== adOwner) return res.status(403).json({ error: 'You are not authorized to select a winner' });
+
+    // Mark all bids for this ad as not winners
+    await pool.query('UPDATE bids SET winner = FALSE WHERE ad_id = $1', [bid.ad_id]);
+
+    // Mark the selected bid as the winner
+    await pool.query('UPDATE bids SET winner = TRUE WHERE id = $1 RETURNING *', [bidId]);
+
+    res.json({ message: 'Bid selected as the winner', winnerBid: bidId });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.get('/winner/:adId', async (req, res) => {
+  try {
+    const { adId } = req.params;
+
+    // Query to get the winning bid for the given ad
+    const result = await pool.query(
+      `SELECT bids.*, agro_ads.image1_url, agro_users.profile_pic, agro_users.username
+       FROM bids
+       JOIN agro_ads ON bids.ad_id = agro_ads.id
+       JOIN agro_users ON bids.user_id = agro_users.id
+       WHERE bids.ad_id = $1 AND bids.winner = TRUE`,
+      [adId]
+    );
+
+    if (result.rows.length === 0) return res.status(404).json({ error: 'No winning bid found for this ad' });
+
+    res.json(result.rows[0]); // Return the winning bid details
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 
 
 // Update a bid
