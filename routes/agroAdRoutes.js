@@ -84,7 +84,11 @@ router.get('/all', async (req, res) => {
         agro_users.id AS user_id, 
         agro_users.username AS seller_name, 
         agro_users.number AS seller_email, 
-        agro_users.user_type AS seller_user_type
+        agro_users.user_type AS seller_user_type,
+        COALESCE(
+          (SELECT winner FROM bids WHERE bids.ad_id = agro_ads.id AND winner = TRUE LIMIT 1),
+          FALSE
+        ) AS has_winner
       FROM 
         agro_ads
       JOIN 
@@ -158,6 +162,88 @@ router.get('/all', async (req, res) => {
 
 
 
+// router.get('/all', async (req, res) => {
+//   try {
+//     const { category, min_price, max_price, sort_by, sort_order, search } = req.query;
+
+//     // Base query to fetch all ads with user details
+//     let query = `
+//       SELECT 
+//         agro_ads.*, 
+//         agro_users.id AS user_id, 
+//         agro_users.username AS seller_name, 
+//         agro_users.number AS seller_email, 
+//         agro_users.user_type AS seller_user_type
+//       FROM 
+//         agro_ads
+//       JOIN 
+//         agro_users ON agro_ads.user_id = agro_users.id
+//     `;
+    
+//     // This will hold the dynamic conditions
+//     const conditions = [];
+//     const queryParams = [];
+
+//     // Filter by category if provided
+//     if (category) {
+//       conditions.push(`agro_ads.category = $${queryParams.length + 1}`);
+//       queryParams.push(category);
+//     }
+
+//     // Filter by price range if provided
+//     if (min_price) {
+//       conditions.push(`agro_ads.ad_price >= $${queryParams.length + 1}`);
+//       queryParams.push(min_price);
+//     }
+//     if (max_price) {
+//       conditions.push(`agro_ads.ad_price <= $${queryParams.length + 1}`);
+//       queryParams.push(max_price);
+//     }
+
+//     // Search ads by title or description if provided
+//     if (search) {
+//       conditions.push(`(agro_ads.ad_title ILIKE $${queryParams.length + 1} OR agro_ads.ad_description ILIKE $${queryParams.length + 2})`);
+//       queryParams.push(`%${search}%`, `%${search}%`);
+//     }
+
+//     // Add the WHERE clause if there are any conditions
+//     if (conditions.length > 0) {
+//       query += ` WHERE ` + conditions.join(' AND ');
+//     }
+
+//     // Sorting logic based on sort_by and sort_order
+//     let orderBy = '';
+//     if (sort_by) {
+//       const validSortColumns = ['ad_price', 'ad_title', 'ad_location', 'ad_weight'];
+//       if (validSortColumns.includes(sort_by)) {
+//         orderBy = ` ORDER BY agro_ads.${sort_by}`;
+//       } else {
+//         return res.status(400).json({ message: 'Invalid sort column.' });
+//       }
+//     }
+
+//     // Only apply the order by if it's specified
+//     if (orderBy && sort_order && ['ASC', 'DESC'].includes(sort_order.toUpperCase())) {
+//       orderBy += ` ${sort_order.toUpperCase()}`;
+//     }
+
+//     // Append the order by clause if present
+//     query += orderBy;
+
+//     // Execute the query with parameters
+//     const result = await pool.query(query, queryParams);
+
+//     if (result.rows.length === 0) {
+//       return res.status(404).json({ message: 'No ads found.' });
+//     }
+
+//     // Return the ads with user details
+//     res.status(200).json({ ads: result.rows });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: 'Failed to retrieve ads.' });
+//   }
+// });
 
 
 router.get('/user/:id', async (req, res) => {
