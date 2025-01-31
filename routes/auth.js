@@ -13,7 +13,7 @@ router.post('/register', async (req, res) => {
 
   try {
     // Check if user or username already exists
-    const existingUser = await pool.query('SELECT * FROM agro_users WHERE number = $1 OR username = $2', [number, username]);
+    const existingUser = await pool.query('SELECT * FROM agro_users WHERE number = $1', [number]);
     if (existingUser.rows.length > 0) {
       return res.status(400).json({ message: 'User with that number or username already exists' });
     }
