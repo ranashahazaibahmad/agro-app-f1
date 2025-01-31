@@ -140,7 +140,7 @@ router.get('/ad/:adId', async (req, res) => {
   }
 });
 
-router.put('/select-winner/:bidId', async (req, res) => {
+router.put('/select-winner/:bidId' , isSeller, async (req, res) => {
   try {
     const { bidId } = req.params;
 
