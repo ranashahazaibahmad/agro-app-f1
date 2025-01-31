@@ -120,10 +120,6 @@ router.put('/', upload.single('profile_pic'), async (req, res) => {
       updatedFields.push('region = $' + (updatedFields.length + 1));
       values.push(region);
     }
-    if (total_bid) {
-      updatedFields.push('total_bid = $' + (updatedFields.length + 1));
-      values.push(total_bid);
-    }
     if (name) {
       updatedFields.push('name = $' + (updatedFields.length + 1));
       values.push(name);

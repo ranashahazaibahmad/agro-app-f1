@@ -32,7 +32,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-  
+    
 
   router.get('/', async (req, res) => {
     try {
@@ -55,9 +55,11 @@ router.post('/', async (req, res) => {
   
       // Query to fetch bids, with dynamic sorting
       const result = await pool.query(
-        `SELECT bids.*, agro_ads.image1_url FROM bids 
-        JOIN agro_ads ON bids.ad_id = agro_ads.id 
-        ORDER BY bids.${sortBy} ${sortOrder}, bids.bid_price ${priceSortOrder}`
+        `SELECT bids.*, agro_ads.image1_url, agro_users.profile_pic , agro_users.username
+      FROM bids 
+      JOIN agro_ads ON bids.ad_id = agro_ads.id 
+      JOIN agro_users ON bids.user_id = agro_users.id
+      ORDER BY ${sortBy} ${sortOrder}, bid_price ${priceSortOrder}`
       );
   
       res.json(result.rows);
@@ -72,9 +74,14 @@ router.post('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await pool.query('SELECT bids.*, agro_ads.image1_url FROM bids ' +
-      'JOIN agro_ads ON bids.ad_id = agro_ads.id ' + 
-      'WHERE bids.id = $1', [id]);
+    const result = await pool.query(`SELECT bids.*, 
+          agro_ads.image1_url, 
+          agro_users.profile_pic, 
+          agro_users.username 
+   FROM bids
+   JOIN agro_ads ON bids.ad_id = agro_ads.id
+   JOIN agro_users ON bids.user_id = agro_users.id
+   WHERE bids.id = $1`, [id]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'Bid not found' });
     res.json(result.rows[0]);
   } catch (err) {
@@ -88,9 +95,14 @@ router.get('/user/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     const result = await pool.query(
-      'SELECT bids.*, agro_ads.image1_url FROM bids ' +
-      'JOIN agro_ads ON bids.ad_id = agro_ads.id ' + 
-      'WHERE bids.user_id = $1', 
+      `SELECT bids.*, 
+              agro_ads.image1_url, 
+              agro_users.profile_pic, 
+              agro_users.username
+       FROM bids
+       JOIN agro_ads ON bids.ad_id = agro_ads.id
+       JOIN agro_users ON bids.user_id = agro_users.id
+       WHERE bids.user_id = $1`, 
       [userId]
     );
 
